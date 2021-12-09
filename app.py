@@ -1,5 +1,4 @@
 import json
-import gzip
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -34,8 +33,9 @@ dash_app._favicon = ('assets/favicon.ico')
 # Load data
 
 ## JSON for NYC zip code boundaries
-with gzip.open('assets/nyc_zip.json.gz', 'rb') as f:
-    mapdata = json.load(f)
+with open('assets/nyc-zip-code.geojson') as f:
+	mapdata = json.load(f)
+
 
 ## Load statistics data for the zip codes
 df = pd.read_csv("assets/combined_final.csv",
@@ -74,6 +74,9 @@ colormap = {
     'A2': '#dfb0d6', 'B2': '#a5add3', 'C2': '#5698b9',
     'A3': '#be64ac', 'B3': '#8c62aa', 'C3': '#3b4994'
 }
+
+## Zip Code Lookup Dictionary
+zipcode_lookup = {feature['properties']['postalCode']: feature for feature in mapdata['features']}
 
 ## Zip codes
 zipcodes = df['zip'].unique().tolist() 
@@ -208,22 +211,12 @@ dash_app.layout = html.Div(
     [Input("zip-dropdown", "value")],
 )
 def update_map(clickData):
-	if value is not None:
-		location = value['points'][0]['location']
-
-		if location not in selections:
-			selections.add(location)
-		else:
-			selections.remove(location)
-
-
-
-
+    # First Layer
 	fig = px.choropleth_mapbox(df, geojson=mapdata, locations='zip', 
                            color="class", 
                            color_discrete_map=colormap, 
                            category_orders={"class": ['C3', 'B3', 'A3', 'C2', 'B2', 'A2', 'C1', 'B1', 'A1']},
-                           featureidkey="properties.ZIP",
+                           featureidkey="properties.postalCode",
                            color_continuous_scale="Viridis",
                            range_color=(0, 75),
                            mapbox_style="carto-positron",
@@ -234,10 +227,13 @@ def update_map(clickData):
                            hover_data=["Information"]
                           )
 
-	fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+
+	fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0},
+		width=800,
+		height=800
+		)
+
 	return fig
-
-
 
 
 
