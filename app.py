@@ -99,6 +99,34 @@ def build_banner():
 def build_graph_title(title):
    return html.P(className="graph-title", children=title)
 
+def draw_map():
+    fig = px.choropleth_mapbox(df, geojson=mapdata, locations='zip', 
+                           color="class", 
+                           color_discrete_map=colormap, 
+                           category_orders={"class": ['C3', 'B3', 'A3', 'C2', 'B2', 'A2', 'C1', 'B1', 'A1']},
+                           featureidkey="properties.postalCode",
+                           color_continuous_scale="Viridis",
+                           range_color=(0, 75),
+                           mapbox_style="carto-positron",
+                           zoom=10, center = {"lat": 40.70229736498986, "lon": -74.01581689028704},
+                           opacity=0.5,
+                           labels={'zip':'Zipcode'},
+                           hover_name=df['zip'],
+                           hover_data=["Information"]
+                          )
+
+
+    fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0},
+        width=800,
+        height=800
+        )
+
+    return fig
+
+
+
+choropleth_map = draw_map()
+
 
 dash_app.layout = html.Div(
   children=[
@@ -186,7 +214,7 @@ dash_app.layout = html.Div(
                               className="row",
                               children=[
                               # dcc Graph here
-                                 dcc.Graph(id='map-graph')
+                                 dcc.Graph(figure=choropleth_map, id='map-graph')
                               ]
 
                             )
@@ -204,36 +232,16 @@ dash_app.layout = html.Div(
 )
 
 
-
-# Update map
+# Update dropdown
 @dash_app.callback(
-    Output("map-graph", "figure"),
-    [Input("zip-dropdown", "value")],
+    Output("zip-dropdown", "value"),
+    [Input("map-graph", "clickData")],
 )
-def update_map(clickData):
-    # First Layer
-	fig = px.choropleth_mapbox(df, geojson=mapdata, locations='zip', 
-                           color="class", 
-                           color_discrete_map=colormap, 
-                           category_orders={"class": ['C3', 'B3', 'A3', 'C2', 'B2', 'A2', 'C1', 'B1', 'A1']},
-                           featureidkey="properties.postalCode",
-                           color_continuous_scale="Viridis",
-                           range_color=(0, 75),
-                           mapbox_style="carto-positron",
-                           zoom=10, center = {"lat": 40.70229736498986, "lon": -74.01581689028704},
-                           opacity=0.5,
-                           labels={'zip':'Zipcode'},
-                           hover_name=df['zip'],
-                           hover_data=["Information"]
-                          )
-
-
-	fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0},
-		width=800,
-		height=800
-		)
-
-	return fig
+def update_zip_dropdown(clickData):
+    if clickData is None:
+        return "10001"
+    else:
+        return "11373"
 
 
 
