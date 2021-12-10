@@ -75,14 +75,13 @@ colormap = {
     'A3': '#be64ac', 'B3': '#8c62aa', 'C3': '#3b4994'
 }
 
-## Zip Code Lookup Dictionary
-zipcode_lookup = {feature['properties']['postalCode']: feature for feature in mapdata['features']}
+
 
 ## Zip codes
 zipcodes = df['zip'].unique().tolist() 
 zipcodes.sort()
 
-
+selection = set()
 
 # Functions
 def build_banner():
@@ -118,15 +117,16 @@ def draw_map():
 
     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0},
         width=800,
-        height=800
+        height=600
         )
 
     return fig
 
 
 
-choropleth_map = draw_map()
 
+# Draw the choropleth map and store it
+choropleth_map = draw_map()
 
 dash_app.layout = html.Div(
   children=[
@@ -231,7 +231,6 @@ dash_app.layout = html.Div(
   ]
 )
 
-
 # Update dropdown
 @dash_app.callback(
     Output("zip-dropdown", "value"),
@@ -241,9 +240,10 @@ def update_zip_dropdown(clickData):
     if clickData is None:
         return "10001"
     else:
-        return "11373"
-
-
+        location = clickData['points'][0]['location']
+        selection.clear()
+        selection.add(location)
+        return list(selection)[0]
 
 # Running the server
 if __name__ == "__main__":
