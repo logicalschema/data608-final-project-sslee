@@ -223,6 +223,34 @@ dash_app.layout = html.Div(
                   ),
                ]
             ),
+    html.Div(
+      id="bottom-row",
+      children=[
+          html.Div(
+              className="bottom-row",
+              id="bottom-row-header",
+              children=[
+                  html.Div(
+                     className="column",
+                     id="form-bar-container",
+                     children=[
+                         build_graph_title("Zip Code Information"),
+                         dcc.Graph(id='form-bar-graph'),
+                     ]
+                  ),
+                  html.Div(
+                     className="column",
+                     id="form-text-container",
+                     children=[
+                         html.P(
+                            id="lower-text-box"),
+                     ],
+                  ),
+              ]
+              )
+      ]
+      ),
+
           ]
     )
 
@@ -244,6 +272,30 @@ def update_zip_dropdown(clickData):
         selection.clear()
         selection.add(location)
         return list(selection)[0]
+
+
+# Update bar plot
+@dash_app.callback(
+    Output("form-bar-graph", "figure"),
+    [
+        Input("zip-dropdown", "value")
+    ],
+)
+def update_bar(zip_dropdown):
+   temp = df[df['zip'] == zip_dropdown]
+   fig = px.bar(
+     temp,
+     x = 'zip',
+     y= ["B02008_001E", "B02009_001E", "B02010_001E", "B02011_001E", "B02012_001E", "B02013_001E", "B03001_002E", "B03001_003E"],
+     title="Demographics for " + str(zip_dropdown),
+     template='simple_white',
+     log_y=True
+    )
+
+   fig.update_layout(barmode='group')
+
+   return fig
+
 
 # Running the server
 if __name__ == "__main__":
