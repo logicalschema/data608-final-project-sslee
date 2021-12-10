@@ -201,10 +201,8 @@ dash_app.layout = html.Div(
                          html.B("Color Key"),
                          html.Div(style={'display': 'flex', 'justify-content': 'space-between'},
                             children=[
-                                html.P("Poor", style={'color':'red'}),
-                                html.P("Fair", style={'color':'orange'}),
-                                html.P("Good", style={'color':'green'})
-                            ]
+                                html.Img(src=dash_app.get_asset_url("colorscheme.png"), style={'height':'70%', 'width':'70%'})
+                                ]
                             ),
                          html.Hr(className="divider"),
                          build_graph_title(html.B("Zip Code")),
