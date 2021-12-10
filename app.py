@@ -76,18 +76,31 @@ colormap = {
     'A3': '#be64ac', 'B3': '#8c62aa', 'C3': '#3b4994'
 }
 
+bar_lookup = {
+    'B02001_001E': 'Total Population',
+    'B02008_001E': 'White',
+    'B02009_001E': 'Black or African American',
+    'B02010_001E': 'American Indian and Alaska Native',
+    'B02011_001E': 'Asian',
+    'B02012_001E': 'Native Hawaiian and other Pacific Islander',
+    'B02013_001E': 'Other race',
+    'B03001_002E': 'Not Hispanic or Latino',
+    'B03001_003E': 'Hispanic or Latino'
+}
 
 legend_lookup = {
     'B02001_001E': 'Total Population',
-    'B02008_001E': 'White alone or +',
-    'B02009_001E': 'Black or African American alone or +',
-    'B02010_001E': 'american indian and alaska native alone or +',
-    'B02011_001E': 'Asian alone or +',
-    'B02012_001E': 'Native Hawaiian and other Pacific Islander alone or +',
-    'B02013_001E': 'Other race alone or +',
+    'B02008_001E': 'White alone or in combination with one or more other races',
+    'B02009_001E': 'Black or African American alone or in combination with one or more other races',
+    'B02010_001E': 'American Indian and Alaska Native alone or in combination with one or more other races',
+    'B02011_001E': 'Asian alone or in combination with one or more other races',
+    'B02012_001E': 'Native Hawaiian and other Pacific Islander alone or in combination with one or more other races',
+    'B02013_001E': 'Other race alone or in combination with one or more other races',
     'B03001_002E': 'Not Hispanic or Latino origin',
     'B03001_003E': 'Hispanic or Latino origin'
 }
+
+
 
 
 
@@ -311,7 +324,7 @@ def update_bar(zip_dropdown):
 
    fig.update_yaxes(title_text='log(value)')
 
-   fig.for_each_trace(lambda t: t.update(name = legend_lookup[t.name],
+   fig.for_each_trace(lambda t: t.update(name = bar_lookup[t.name],
                                       legendgroup = legend_lookup[t.name],
                                       hovertemplate = t.hovertemplate.replace(t.name, legend_lookup[t.name])
                                      )
