@@ -57,6 +57,7 @@ alcoholLabels = ['1', '2', '3']
 df['alcohol_classification'] = pd.qcut(df['alcohol'], 3, labels = alcoholLabels)
 df['class'] = df['tobacco_classification'].astype(str) + df['alcohol_classification'].astype(str)
 
+
 ## Setup hover text
 df['Information'] = 'Tobacco Licenses: ' + df['tobacco'].astype(str) + '<br>' + \
     'Alcohol Licenses: ' + df['alcohol'].astype(str) + '<br>' + \
@@ -73,6 +74,19 @@ colormap = {
     'A1': '#e8e8e8', 'B1': '#ace4e4', 'C1': '#5ac8c8',
     'A2': '#dfb0d6', 'B2': '#a5add3', 'C2': '#5698b9',
     'A3': '#be64ac', 'B3': '#8c62aa', 'C3': '#3b4994'
+}
+
+
+legend_lookup = {
+    'B02001_001E': 'Total Population',
+    'B02008_001E': 'White alone or +',
+    'B02009_001E': 'Black or African American alone or +',
+    'B02010_001E': 'american indian and alaska native alone or +',
+    'B02011_001E': 'Asian alone or +',
+    'B02012_001E': 'Native Hawaiian and other Pacific Islander alone or +',
+    'B02013_001E': 'Other race alone or +',
+    'B03001_002E': 'Not Hispanic or Latino origin',
+    'B03001_003E': 'Hispanic or Latino origin'
 }
 
 
@@ -201,6 +215,8 @@ dash_app.layout = html.Div(
                            ],
                            value=zipcodes[0],
                          ),
+                         html.Br(),
+                         html.Br(),
                    ]
                   ),
                   html.Div(
@@ -282,19 +298,63 @@ def update_zip_dropdown(clickData):
     ],
 )
 def update_bar(zip_dropdown):
-   temp = df[df['zip'] == zip_dropdown]
    fig = px.bar(
-     temp,
+     df[df['zip'] == zip_dropdown],
      x = 'zip',
      y= ["B02008_001E", "B02009_001E", "B02010_001E", "B02011_001E", "B02012_001E", "B02013_001E", "B03001_002E", "B03001_003E"],
      title="Demographics for " + str(zip_dropdown),
      template='simple_white',
-     log_y=True
+     log_y=True,
     )
 
-   fig.update_layout(barmode='group')
+   fig.update_layout(barmode='group',
+    legend_title_text='Race'
+    )
+
+   fig.update_yaxes(title_text='log(value)')
+
+   fig.for_each_trace(lambda t: t.update(name = legend_lookup[t.name],
+                                      legendgroup = legend_lookup[t.name],
+                                      hovertemplate = t.hovertemplate.replace(t.name, legend_lookup[t.name])
+                                     )
+                  )
 
    return fig
+
+
+
+
+# Update bar plot
+@dash_app.callback(
+    Output("lower-text-box", "children"),
+    [
+        Input("zip-dropdown", "value")
+    ],
+)
+def update_textbox(zip_dropdown):
+
+   row = df[df['zip'] == zip_dropdown]
+
+   children = [
+     html.B('Information:'),
+     html.P('Zip Code: {}'.format(zip_dropdown)),
+     html.P('Total Population: {:,}'.format(row['B02001_001E'].values[0])),
+     html.P('Percentage Below Poverty Line: {}%'.format(row['percentage'].values[0])),
+     html.P([html.Br(), html.B('Race')]),
+     html.P('{}: {:,}'.format(legend_lookup['B02008_001E'], row['B02008_001E'].values[0])),
+     html.P('{}: {:,}'.format(legend_lookup['B02009_001E'], row['B02009_001E'].values[0])),
+     html.P('{}: {:,}'.format(legend_lookup['B02010_001E'], row['B02010_001E'].values[0])),
+     html.P('{}: {:,}'.format(legend_lookup['B02011_001E'], row['B02011_001E'].values[0])),
+     html.P('{}: {:,}'.format(legend_lookup['B02012_001E'], row['B02012_001E'].values[0])),
+     html.P('{}: {:,}'.format(legend_lookup['B02013_001E'], row['B02013_001E'].values[0])),
+     html.P('{}: {:,}'.format(legend_lookup['B03001_002E'], row['B03001_002E'].values[0])),
+     html.P('{}: {:,}'.format(legend_lookup['B03001_003E'], row['B03001_003E'].values[0])),
+   ]
+
+
+
+
+   return children
 
 
 # Running the server
